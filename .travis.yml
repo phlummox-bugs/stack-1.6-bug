@@ -1,0 +1,41 @@
+
+# Use new container infrastructure to enable caching
+sudo: false
+
+# Do not choose a language; we provide our own build tools.
+language: generic
+
+# Caching so the next build will be fast too.
+cache:
+  directories:
+  - $HOME/.stack
+
+matrix:
+  include:
+
+  - env: STACK_URL="https://github.com/commercialhaskell/stack/releases/download/v1.5.1/stack-1.5.1-linux-x86_64.tar.gz"
+
+  - env: STACK_URL="https://github.com/commercialhaskell/stack/releases/download/v1.6.1/stack-1.6.1-linux-x86_64.tar.gz"
+
+before_install:
+# Using compiler above sets CC to an invalid value, so unset it
+- unset CC
+# Download and unpack the stack executable
+- export PATH=$HOME/.local/bin:$PATH
+- mkdir -p ~/.local/bin
+- travis_retry curl -L "${STACK_URL}" | tar xz --wildcards --strip-components=1 -C ~/.local/bin '*/stack'
+- |
+  stack setup
+
+  # Use the more reliable S3 mirror of Hackage
+  mkdir -p $HOME/.cabal
+  echo 'remote-repo: hackage.haskell.org:http://hackage.fpcomplete.com/' > $HOME/.cabal/config
+  echo 'remote-repo-cache: $HOME/.cabal/packages' >> $HOME/.cabal/config
+- stack --version
+
+install:
+- stack --no-terminal --install-ghc build
+
+script:
+- stack --no-terminal --install-ghc test
+
