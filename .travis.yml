@@ -32,6 +32,8 @@ before_install:
   echo 'remote-repo: hackage.haskell.org:http://hackage.fpcomplete.com/' > $HOME/.cabal/config
   echo 'remote-repo-cache: $HOME/.cabal/packages' >> $HOME/.cabal/config
 - stack --version
+- stack --upgrade
+- stack --upgrade --git --git-branch stable
 
 install:
 - stack --no-terminal --install-ghc build
